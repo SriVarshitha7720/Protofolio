@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Coding Profiles</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 40px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 250px;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .value {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .link {
+      font-size: 14px;
+      color: #007bff;
+      text-decoration: none;
+    }
+    .link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>💻 My Coding Profiles</h1>
+  <div class="cards">
+    <div class="card">
+      <div class="title">GitHub</div>
+      <div class="value" id="github-repos">--</div>
+      <a class="link" href="https://github.com/YOUR_GITHUB" target="_blank">View Profile</a>
+    </div>
+    <div class="card">
+      <div class="title">Codeforces</div>
+      <div class="value" id="cf-rating">--</div>
+      <a class="link" href="https://codeforces.com/profile/YOUR_CODEFORCES" target="_blank">View Profile</a>
+    </div>
+    <div class="card">
+      <div class="title">LeetCode</div>
+      <div class="value" id="lc-solved">--</div>
+      <a class="link" href="https://leetcode.com/YOUR_LEETCODE/" target="_blank">View Profile</a>
+    </div>
+  </div>
+
+  <script>
+    async function loadProfiles() {
+      // GitHub
+      try {
+        let gh = await fetch("https://api.github.com/users/YOUR_GITHUB");
+        let ghData = await gh.json();
+        document.getElementById("github-repos").innerText = ghData.public_repos + " Repos";
+      } catch {
+        document.getElementById("github-repos").innerText = "Error";
+      }
+
+      // Codeforces
+      try {
+        let cf = await fetch("https://codeforces.com/api/user.info?handles=YOUR_CODEFORCES");
+        let cfData = await cf.json();
+        document.getElementById("cf-rating").innerText = cfData.result[0].rating;
+      } catch {
+        document.getElementById("cf-rating").innerText = "Error";
+      }
+
+      // LeetCode (GraphQL API)
+      try {
+        let query = `
+        {
+          matchedUser(username: "YOUR_LEETCODE") {
+            submitStats {
+              acSubmissionNum {
+                difficulty
+                count
+              }
+            }
+          }
+        }`;
+        let lc = await fetch("https://leetcode.com/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
+        });
+        let lcData = await lc.json();
+        let totalSolved = lcData.data.matchedUser.submitStats.acSubmissionNum[0].count;
+        document.getElementById("lc-solved").innerText = totalSolved + " Solved";
+      } catch {
+        document.getElementById("lc-solved").innerText = "Error";
+      }
+    }
+
+    loadProfiles();
+  </script>
+</body>
+</html>
